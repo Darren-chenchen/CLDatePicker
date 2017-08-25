@@ -6,9 +6,9 @@
 		lazy var pickView: CLDatePicker = {
         let pick = CLDatePicker.init(frame: CGRect(x:0,y:self.headerH,width:self.KScreenWidth,height:self.contentH-self.headerH))
         return pick
-    }()
+   		 }()
     
-    self.pickView.selectedTitleColor = UIColor.red
+    	self.pickView.selectedTitleColor = UIColor.red
     	// 设置选中的日期，不设置的话默认是今天
         self.selectedDate = Date()
         // 设置最大可现实的日期，如果超过该日期就自动回滚
