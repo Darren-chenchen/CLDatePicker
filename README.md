@@ -1,7 +1,9 @@
 # CLDatePicker
 自定义时间选择器，支持设置选中状态的文字颜色
 
+
 # 使用方式：
+#### 由于不同项目的UI界面不同，所以这里只是封装了一个类似PickView的控件，创建CLDatePicker,然后将该控件放置到指定的UI界面上
 		
 		lazy var pickView: CLDatePicker = {
         let pick = CLDatePicker.init(frame: CGRect(x:0,y:self.headerH,width:self.KScreenWidth,height:self.contentH-self.headerH))
@@ -17,6 +19,8 @@
         self.pickView.datePickerValueChange = { [weak self] (yearStr,monthStr,dayStr) in
             print("\(yearStr)===\(monthStr)====\(dayStr)")
         }
+        
+        
 
 # 效果图
 
