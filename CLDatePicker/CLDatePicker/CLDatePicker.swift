@@ -80,9 +80,7 @@ class CLDatePicker: UIView {
         // 由于执行先后顺序问题，延迟执行
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now()+0.2) { 
             // 传递数据给外界
-            if self.datePickerValueChange != nil {
-                self.datePickerValueChange!(self.yearArr[self.currentRow1!],self.monthsArr[self.currentRow2!],self.dayArr[self.currentRow3!])
-            }
+            self.dealDateStr()
         }
     }
     
@@ -235,6 +233,10 @@ extension CLDatePicker: UIPickerViewDelegate,UIPickerViewDataSource {
         }
         
         // 传递数据给外界
+        self.dealDateStr()
+    }
+    
+    func dealDateStr() {
         if datePickerValueChange != nil {
             
             let passYear = self.yearArr[self.currentRow1!]
@@ -245,8 +247,10 @@ extension CLDatePicker: UIPickerViewDelegate,UIPickerViewDataSource {
             
             let passDay = self.dayArr[self.currentRow3!]
             let day = passDay.substring(to:passDay.index(passDay.startIndex, offsetBy: passDay.characters.count-1))
-
+            
             self.datePickerValueChange!(year,month,day)
+            
         }
     }
+
 }
