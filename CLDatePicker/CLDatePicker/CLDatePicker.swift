@@ -13,7 +13,7 @@ typealias datePickerValueChangeClouse = (String,String,String)->()
 class CLDatePicker: UIView {
     
     var datePickerValueChange: datePickerValueChangeClouse?
-
+    
     lazy var pickView: UIPickerView = {
         let pick = UIPickerView.init(frame: self.bounds)
         pick.delegate = self
@@ -40,9 +40,11 @@ class CLDatePicker: UIView {
             self.pickView.reloadAllComponents()
         }
     }
-
+    
     // 设置选中的日期，默认选中当前日期
-    var defaultSelectData = Date()
+    var defaultSelectDate = Date()
+    // 设置当前选中的日期
+    var currentSelectDate = Date()
     // 设置最大可以显示到的日期,默认是今天
     var maxDate: Date?
     // 记录当前选中的行
@@ -63,22 +65,22 @@ class CLDatePicker: UIView {
         
         // 设置默认选中的行
         let calendar = NSCalendar.current
-        let defYear = calendar.component(.year, from: self.defaultSelectData)
-        let defMonth = calendar.component(.month, from: self.defaultSelectData)
-        let defDay = calendar.component(.day, from: self.defaultSelectData)
+        let defYear = calendar.component(.year, from: self.defaultSelectDate)
+        let defMonth = calendar.component(.month, from: self.defaultSelectDate)
+        let defDay = calendar.component(.day, from: self.defaultSelectDate)
         self.getDaysInMonth(year: defYear, month: defMonth)
-
+        
         self.pickView.selectRow(defYear-1, inComponent: 0, animated: true)
         self.pickView.selectRow(defMonth-1, inComponent: 1, animated: true)
         self.pickView.selectRow(defDay-1, inComponent: 2, animated: true)
-
+        
         // 初始化默认选中的行
         self.currentRow1 = defYear-1
         self.currentRow2 = defMonth-1
         self.currentRow3 = defDay-1
         
         // 由于执行先后顺序问题，延迟执行
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now()+0.2) { 
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now()+0.2) {
             // 传递数据给外界
             self.dealDateStr()
         }
@@ -148,7 +150,7 @@ extension CLDatePicker: UIPickerViewDelegate,UIPickerViewDataSource {
             return self.dayArr[row]
         }
     }
-
+    
     func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
         let label = UILabel()
         label.text = self.pickerView(pickerView, titleForRow: row, forComponent: component)
@@ -189,7 +191,6 @@ extension CLDatePicker: UIPickerViewDelegate,UIPickerViewDataSource {
         let nowDay = self.dayArr[self.pickView.selectedRow(inComponent: 2)]
         let day = Int(nowDay.substring(to:nowDay.index(nowDay.startIndex, offsetBy: nowDay.characters.count-1))) ?? 1
         
-
         // 月份更新日期
         if component == 1 || component == 0{
             self.getDaysInMonth(year: year, month: month)
@@ -207,33 +208,43 @@ extension CLDatePicker: UIPickerViewDelegate,UIPickerViewDataSource {
             self.pickView.reloadComponent(2)
         }
         
-        // 设置了最大日期，如果超过就自动滚到最大日期
-        if self.maxDate != nil {
-            let calendar = NSCalendar.current
-            let maxYear = calendar.component(.year, from: self.maxDate!)
-            let maxMonth = calendar.component(.month, from: self.maxDate!)
-            let maxDay = calendar.component(.day, from: self.maxDate!)
-            
-            // 如果超过了最大年份，或者最大月份，或者最大日期，就自动返回到最大日期
-            if year > maxYear {
-                self.pickView.selectRow(maxYear-1, inComponent: 0, animated: true)
-                self.currentRow1 = maxYear-1
-                self.pickView.reloadComponent(0)
-            }
-            if month > maxMonth {
-                self.pickView.selectRow(maxMonth-1, inComponent: 1, animated: true)
-                self.currentRow2 = maxMonth-1
-                self.pickView.reloadComponent(1)
-            }
-            if day > maxDay {
-                self.pickView.selectRow(maxDay-1, inComponent: 2, animated: true)
-                self.currentRow3 = maxDay-1
-                self.pickView.reloadComponent(2)
-            }
-        }
-        
         // 传递数据给外界
         self.dealDateStr()
+        
+        
+        // 设置了最大日期，如果超过就自动滚到最大日期
+        if self.maxDate != nil {
+            
+            if self.adjustDate() == 1 {
+                let calendar = NSCalendar.current
+                let maxYear = calendar.component(.year, from: self.maxDate!)
+                let maxMonth = calendar.component(.month, from: self.maxDate!)
+                let maxDay = calendar.component(.day, from: self.maxDate!)
+                
+                // 如果超过了最大年份，或者最大月份，或者最大日期，就自动返回到最大日期
+                if year > maxYear {
+                    self.pickView.selectRow(maxYear-1, inComponent: 0, animated: true)
+                    self.currentRow1 = maxYear-1
+                    self.pickView.reloadComponent(0)
+                }
+                if month > maxMonth {
+                    self.pickView.selectRow(maxMonth-1, inComponent: 1, animated: true)
+                    self.currentRow2 = maxMonth-1
+                    self.pickView.reloadComponent(1)
+                }
+                if day > maxDay {
+                    self.pickView.selectRow(maxDay-1, inComponent: 2, animated: true)
+                    self.currentRow3 = maxDay-1
+                    self.pickView.reloadComponent(2)
+                }
+            }
+        }
+    }
+    
+    // 比较日期
+    func adjustDate() -> Int{
+        let result: ComparisonResult = self.currentSelectDate.compare(self.maxDate!)
+        return result.rawValue
     }
     
     func dealDateStr() {
@@ -243,14 +254,24 @@ extension CLDatePicker: UIPickerViewDelegate,UIPickerViewDataSource {
             let year = passYear.substring(to:passYear.index(passYear.startIndex, offsetBy: passYear.characters.count-1))
             
             let passMonth = self.monthsArr[self.currentRow2!]
-            let month = passMonth.substring(to:passMonth.index(passMonth.startIndex, offsetBy: passMonth.characters.count-1))
+            var month = passMonth.substring(to:passMonth.index(passMonth.startIndex, offsetBy: passMonth.characters.count-1))
             
             let passDay = self.dayArr[self.currentRow3!]
-            let day = passDay.substring(to:passDay.index(passDay.startIndex, offsetBy: passDay.characters.count-1))
+            var day = passDay.substring(to:passDay.index(passDay.startIndex, offsetBy: passDay.characters.count-1))
             
+            if month.characters.count == 1 {
+                month = "0" + month
+            }
+            if day.characters.count == 1 {
+                day = "0" + day
+            }
             self.datePickerValueChange!(year,month,day)
             
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            let str = year+"-"+month+"-"+day
+            let date = formatter.date(from: str)
+            self.currentSelectDate = date!
         }
     }
-
 }
