@@ -237,6 +237,9 @@ extension CLDatePicker: UIPickerViewDelegate,UIPickerViewDataSource {
                     self.currentRow3 = maxDay-1
                     self.pickView.reloadComponent(2)
                 }
+                
+                self.dealDateStr()
+
             }
         }
     }

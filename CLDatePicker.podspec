@@ -9,8 +9,7 @@ Pod::Spec.new do |s|
 
       s.ios.deployment_target = '8.0'
 
-      s.source_files = 'CLImagePickerTool/CLImagePickerTool/**/*.swift'
+      s.source_files = 'CLDatePicker/CLDatePicker/**/*.swift'
       s.resource_bundles = { 
-'CLImagePickerTool' => ['CLImagePickerTool/CLImagePickerTool/images/**/*.png','CLImagePickerTool/CLImagePickerTool/**/*.{xib,storyboard}','CLImagePickerTool/CLImagePickerTool/**/*.{lproj,strings}']
       }
     end
